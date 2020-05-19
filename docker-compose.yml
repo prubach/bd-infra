@@ -59,7 +59,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432"
     ports:
-      - "9083:9083"
+        - "9083:9083"
     depends_on:
       - hive-metastore-postgresql
     networks:
@@ -76,7 +76,7 @@ services:
         ipv4_address: 172.27.1.9
     
   spark-master:
-    image: bde2020/spark-master:2.4.0-hadoop2.7
+    image: bde2020/spark-master:2.4.5-hadoop2.7
     container_name: spark-master
     ports:
       - 8080:8080
@@ -89,33 +89,68 @@ services:
       net_pet:
         ipv4_address: 172.27.1.10
      
-  spark-worker:
-    image: bde2020/spark-worker:2.4.0-hadoop2.7
-    container_name: spark-worker
+  spark-worker-1:
+    image: bde2020/spark-worker:2.4.5-hadoop2.7
+    container_name: spark-worker-1
     depends_on:
       - spark-master
     environment:
       - SPARK_MASTER=spark://spark-master:7077
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore
-    depends_on:
-      - spark-master
     ports:
       - 8081:8081
     env_file:
       - ./hadoop-hive.env
     networks:
       net_pet:
-        ipv4_address: 172.27.1.11
+        ipv4_address: 172.27.1.21
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.hostname == zalman 
+
+  spark-worker-2:
+    image: bde2020/spark-worker:2.4.5-hadoop2.7
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore
+    ports:
+      - 8082:8081
+    env_file:
+      - ./hadoop-hive.env
+    networks:
+      net_pet:
+        ipv4_address: 172.27.1.22
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.hostname == yoga7 
+
+#    deploy:
+#      mode: replicated
+#      replicas: 2
+#      update_config:
+#        parallelism: 2
 
   zeppelin:
-    image: openkbs/docker-spark-bde2020-zeppelin
+    image: prubach/docker-spark-zeppelin 
     container_name: zeppelin
     environment:
       CORE_CONF_fs_defaultFS: "hdfs://namenode:8020"
       SPARK_MASTER: "spark://spark-master:7077"
       MASTER: "spark://spark-master:7077"
+      SPARK_HOME: /spark
       SPARK_MASTER_URL: spark://spark-master:7077
+      ZEPPELIN_ADDR: zeppelin
       ZEPPELIN_PORT: 8080
       ZEPPELIN_JAVA_OPTS:
         -Dspark.driver.memory=1g
@@ -125,15 +160,15 @@ services:
     env_file:
       - ./hadoop-hive.env
     volumes:
-      - /tmp/simple-demo/zeppelin/data:/usr/lib/zeppelin/data:rw
-      - /tmp/simple-demo/zeppelin/notebook:/usr/lib/zeppelin/notebook:rw
+      - ./zeppelin/data:/usr/lib/zeppelin/data:rw
+      - ./zeppelin/notebook:/usr/lib/zeppelin/notebook:rw
     command: /usr/lib/zeppelin/bin/zeppelin.sh
     networks:
       net_pet:
         ipv4_address: 172.27.1.12
 
   hue:
-      image: gethue/hue:20191107-135001
+      image: gethue/hue:20200501-135001
       hostname: hue
       container_name: hue
       dns: 8.8.8.8
@@ -166,36 +201,36 @@ services:
         net_pet:
           ipv4_address: 172.27.1.14
 
-  zookeeper:
-    image: wurstmeister/zookeeper:3.4.6
-    ports:
-      - "2181:2181"
-    networks:
-      net_pet:
-        ipv4_address: 172.27.1.15
+#  zookeeper:
+#    image: wurstmeister/zookeeper:3.4.6
+#    ports:
+#      - "2181:2181"
+#    networks:
+#      net_pet:
+#        ipv4_address: 172.27.1.15
 
-  kafka:
-    image: wurstmeister/kafka:2.12-2.3.0
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: 172.27.1.16
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    networks:
-      net_pet:
-        ipv4_address: 172.27.1.16  
+#  kafka:
+#    image: wurstmeister/kafka:2.12-2.5.0
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: 172.27.1.16
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#    networks:
+#      net_pet:
+#        ipv4_address: 172.27.1.16  
 
-  streamsets:
-    image: streamsets/datacollector:3.13.0-latest
-    ports:
-      - "18630:18630"
-    networks:
-      net_pet:
-        ipv4_address: 172.27.1.17  
+#  streamsets:
+#    image: streamsets/datacollector:3.17.0-latest
+#    ports:
+#      - "18630:18630"
+#    networks:
+#      net_pet:
+#        ipv4_address: 172.27.1.17  
 
 networks:
   net_pet:
     ipam:
       driver: default
       config:
-        - subnet: 172.27.0.0/16
+        - subnet: 172.27.1.0/24
