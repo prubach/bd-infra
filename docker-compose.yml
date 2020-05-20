@@ -178,17 +178,14 @@ services:
     env_file:
       - ./hadoop-hive.env
     volumes:
+      - ./zeppelin/conf/shiro.ini:/usr/lib/zeppelin/conf/shiro.ini
       - ./hadoop_conf:/hadoop/conf
       - ./zeppelin/data:/usr/lib/zeppelin/data:rw
       - ./zeppelin/notebook:/usr/lib/zeppelin/notebook:rw
-    command: /usr/lib/zeppelin/bin/zeppelin.sh
+#    command: /usr/lib/zeppelin/bin/zeppelin.sh
     networks:
       net_pet:
         ipv4_address: 172.27.1.70
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      endpoint_mode: dnsrr
 
   hue:
       image: gethue/hue:20200501-135001
