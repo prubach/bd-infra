@@ -1,1 +1,1 @@
-docker stack deploy --compose-file docker-compose.yml bigdata
+docker stack deploy --compose-file docker-compose.yml bd

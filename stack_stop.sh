@@ -1,1 +1,1 @@
-docker stack rm bigdata
+docker stack rm bd

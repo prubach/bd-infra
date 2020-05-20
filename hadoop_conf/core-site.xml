@@ -1,0 +1,9 @@
+<configuration>
+    <property><name>fs_defaultFS</name><value>hdfs://namenode:8020</value></property>
+    <property><name>hadoop_http_staticuser_user</name><value>root</value></property>
+    <property><name>hadoop_proxyuser_hue_hosts</name><value>*</value></property>
+    <property><name>hadoop_proxyuser_hue_groups</name><value>*</value></property>
+    <property><name>hadoop_proxyuser_hduser_groups</name><value>*</value></property>
+    <property><name>hadoop_proxyuser_hduser_hosts</name><value>*</value>
+    </property>
+</configuration>

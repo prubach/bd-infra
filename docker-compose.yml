@@ -1,11 +1,11 @@
-version: '3' 
+version: '3.8'
 services:
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
     container_name: namenode
     volumes:
-      - /tmp/hdfs/namenode:/hadoop/dfs/name
+      - ./hdfs/namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -20,7 +20,7 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     container_name: datanode
     volumes:
-      - /tmp/hdfs/datanode:/hadoop/dfs/data
+      - ./hdfs/datanode:/hadoop/dfs/data
       - ./bank:/bank
     env_file:
       - ./hadoop-hive.env
@@ -30,6 +30,7 @@ services:
       - namenode
     ports:
       - "50075:50075"
+      - "50010:50010"
     networks:
       net_pet:
         ipv4_address: 172.27.1.6
@@ -78,10 +79,13 @@ services:
   spark-master:
     image: bde2020/spark-master:2.4.5-hadoop2.7
     container_name: spark-master
+    volumes:
+      - ./hadoop_conf:/hadoop/conf
     ports:
       - 8080:8080
       - 7077:7077
     environment:
+      - HADOOP_CONF_DIR=/hadoop/conf
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     env_file:
       - ./hadoop-hive.env
@@ -92,11 +96,14 @@ services:
   spark-worker-1:
     image: bde2020/spark-worker:2.4.5-hadoop2.7
     container_name: spark-worker-1
+    volumes:
+      - ./hadoop_conf:/hadoop/conf
     depends_on:
       - spark-master
     environment:
       - SPARK_MASTER=spark://spark-master:7077
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HADOOP_CONF_DIR=/hadoop/conf
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore
     ports:
       - 8081:8081
@@ -115,11 +122,14 @@ services:
   spark-worker-2:
     image: bde2020/spark-worker:2.4.5-hadoop2.7
     container_name: spark-worker-2
+    volumes:
+      - ./hadoop_conf:/hadoop/conf
     depends_on:
       - spark-master
     environment:
       - SPARK_MASTER=spark://spark-master:7077
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HADOOP_CONF_DIR=/hadoop/conf
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore
     ports:
       - 8082:8081
@@ -142,7 +152,8 @@ services:
 #        parallelism: 2
 
   zeppelin:
-    image: prubach/docker-spark-zeppelin 
+    image: prubach/docker-spark-zeppelin
+#    hostname: zeppelin
     container_name: zeppelin
     environment:
       CORE_CONF_fs_defaultFS: "hdfs://namenode:8020"
@@ -150,22 +161,32 @@ services:
       MASTER: "spark://spark-master:7077"
       SPARK_HOME: /spark
       SPARK_MASTER_URL: spark://spark-master:7077
-      ZEPPELIN_ADDR: zeppelin
-      ZEPPELIN_PORT: 8080
+      HADOOP_CONF_DIR: /hadoop/conf
+#      ZEPPELIN_ADDR: zeppelin
+      ZEPPELIN_ADDR: 0.0.0.0
+      ZEPPELIN_PORT: 19090
       ZEPPELIN_JAVA_OPTS:
         -Dspark.driver.memory=1g
         -Dspark.executor.memory=2g
     ports:
-      - 19090:8080
+      - target: 19090
+        published: 19090
+        protocol: tcp
+        mode: ingress
     env_file:
       - ./hadoop-hive.env
     volumes:
+      - ./hadoop_conf:/hadoop/conf
       - ./zeppelin/data:/usr/lib/zeppelin/data:rw
       - ./zeppelin/notebook:/usr/lib/zeppelin/notebook:rw
     command: /usr/lib/zeppelin/bin/zeppelin.sh
     networks:
       net_pet:
         ipv4_address: 172.27.1.12
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      endpoint_mode: dnsrr
 
   hue:
       image: gethue/hue:20200501-135001
