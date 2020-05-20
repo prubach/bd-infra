@@ -210,7 +210,7 @@ services:
           - "33061:3306"
       command: --init-file /data/application/init.sql
       volumes:
-          - /tmp/mysql/data:/var/lib/mysql
+          - ./mysql/data:/var/lib/mysql
           - ./init.sql:/data/application/init.sql
       environment:
           MYSQL_ROOT_USER: root
