@@ -34,7 +34,14 @@ services:
     networks:
       net_pet:
         ipv4_address: 172.27.1.20
-  
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          #- node.hostname == zalman
+          - node.hostname == gordian77
+
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-server
