@@ -1,5 +1,9 @@
 <configuration>
     <property>
+        <name>dfs.data.dir</name>
+        <value>/hadoop/dfs/data</value>
+    </property>
+    <property>
         <name>dfs_webhdfs_enabled</name>
         <value>true</value>
     </property>
@@ -34,5 +38,13 @@
     <property>
         <name>dfs.datanode.use.datanode.hostname</name>
         <value>true</value>
+    </property>
+    <property>
+        <name>dfs.namenode.servicerpc-address</name>
+        <value>namenode:8020</value>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address</name>
+        <value>namenode:8020</value>
     </property>
 </configuration>
