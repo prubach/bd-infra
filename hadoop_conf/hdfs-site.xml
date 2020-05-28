@@ -4,6 +4,10 @@
         <value>/hadoop/dfs/data</value>
     </property>
     <property>
+        <name>dfs.replication</name>
+        <value>2</value>
+    </property>
+    <property>
         <name>dfs_webhdfs_enabled</name>
         <value>true</value>
     </property>
