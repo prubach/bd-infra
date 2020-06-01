@@ -150,6 +150,40 @@ services:
           #- node.hostname == yoga7
           - node.hostname == gordian74
 
+  datanode-3:
+    image: prubach/docker-spark-worker-hadoop-datanode:2.4.5_2.0.0-2.7.7
+    #image: bde2020/spark-worker:2.4.5-hadoop2.7
+    #container_name: spark-worker-1
+    container_name: datanode-3
+    volumes:
+      - ./hadoop_conf:/hadoop/conf
+      - ./hdfs/datanode-2:/hadoop/dfs/data
+      - ./bank:/bank
+    depends_on:
+      - spark-master
+      - namenode
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      - SERVICE_PRECONDITION=namenode:50070
+      - SPARK_MASTER=spark://spark-master:7077
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HADOOP_CONF_DIR=/hadoop/conf
+      - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore
+    ports:
+      - 8083:8081
+      - 50077:50075
+      - 50012:50010
+    networks:
+      net_pet:
+        ipv4_address: 172.27.1.65
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          #- node.hostname == yoga7
+          - node.hostname == gordian52
 
 #  spark-worker-2:
 #    image: bde2020/spark-worker:2.4.5-hadoop2.7
