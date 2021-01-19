@@ -148,7 +148,7 @@ services:
       placement:
         constraints:
           #- node.hostname == yoga7
-          - node.hostname == gordian74
+          - node.hostname == gordian76
 
   datanode-3:
     image: prubach/docker-spark-worker-hadoop-datanode:2.4.5_2.0.0-2.7.7
