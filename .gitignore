@@ -1,6 +1,9 @@
 .idea
 *.iml
-hdfs/datanode/
-hdfs/datanode-2/
-hdfs/namenode/
+hdfs/datanode
+hdfs/datanode-2
+hdfs/namenode
+hdfs/datanode-3
 mysql/data
+mysql/data-old
+jupyter/work
